@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        description: Version of the release, like "1.0.0"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Update Version File
+      run: |
+        echo "${{ github.event.inputs.version }}" > ./version
+    - name: Prepare Commit
+      run: |
+        git config --local user.email "frank@fhessel.de"
+        git config --local user.name "Frank Hessel"
+        git commit version -m "Release ${{ github.event.inputs.version }}"
+        git tag -a -m "Release ${{ github.event.inputs.version }}" "v${{ github.event.inputs.version }}"
+    - name: Push changes
+      uses: ad-m/github-push-action@v0.6.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: main
+        tags: true
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: "v${{ github.event.inputs.version }}"
+        release_name: Release ${{ github.event.inputs.version }}
+        draft: false
+        prerelease: false

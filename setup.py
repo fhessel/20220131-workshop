@@ -6,7 +6,7 @@ def readfile(filename):
 
 setup(
     name="workshop",
-    version="1.0.0",
+    version=readfile("version"),
     description="We want to look into GitHub Actions",
     author="fhessel",
     packages=find_packages(exclude=["tests", ".github"]),
